@@ -1,4 +1,5 @@
 import mysql.connector
+import getpass
 
 def connect_to_db():
     return mysql.connector.connect(
@@ -11,7 +12,9 @@ def connect_to_db():
 def new_password():
     site = input("Enter site name: ")
     username = input("Enter username: ")
-    password = input("Enter password: ")
+    #password = input("Enter password: ")
+    password = getpass.getpass(prompt = "Enter password: ")
+
     save_to_database(site, username, password)
 
 def get_password():
@@ -47,10 +50,25 @@ def get_from_database(site):
     return myresult[0][0],myresult[0][1]
 
 
+def handle_master_password():
+    correct = False
+    while not correct:
+        try:
+            p = getpass.getpass(prompt = "Master Password: ")
+        except Exception as error:
+            print('ERROR', error)
+        else:
+            if p == "hello":
+                correct = True
+            else:
+                print("Password Incorrect")
 
 def main():
     connect_to_db()
     print("Hello, welcome to password manager")
+    # enter master password
+    handle_master_password()
+
     # options
     # 1. Make new password
     # 2. Get a password
