@@ -16,7 +16,9 @@ def new_password():
 
 def get_password():
     site = input("Enter site name: ")
-    get_from_database(site)
+    username,password = get_from_database(site)
+    print("Username: ", username)
+    print("Password: ", password)
 
 def save_to_database(site, username, password):
     mydb = connect_to_db()
@@ -32,7 +34,17 @@ def save_to_database(site, username, password):
     print(mycursor.rowcount, "record inserted.")
 
 def get_from_database(site):
+    mydb = connect_to_db()
     print(site)
+
+    mycursor = mydb.cursor()
+
+    sql = "SELECT username, password FROM passwords WHERE site = %(site)s"
+    mycursor.execute(sql, { 'site': site })
+
+    myresult = mycursor.fetchall()
+
+    return myresult[0][0],myresult[0][1]
 
 
 
