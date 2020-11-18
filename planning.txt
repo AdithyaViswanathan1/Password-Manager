@@ -1,0 +1,20 @@
+password manager
+
+stores email and password for sites in a database
+
+Saving New password
+1. Ask user for site name
+2. Ask user for email
+3. Ask user for password
+
+Retrieving passwords
+1. Ask user site name
+2. Returns email and password for that site
+
+Database:
+Columns = primary key, site, username, password
+
+Later features:
+1. Master password
+2. Hashing the password in the database (in case of a database leak/hack)
+3. Option to auto-generate a password when creating passwords
