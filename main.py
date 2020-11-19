@@ -3,6 +3,7 @@ import getpass
 import cryptography
 from cryptography.fernet import Fernet
 import os
+import clipboard
 
 def connect_to_db():
     global key
@@ -22,6 +23,7 @@ def new_password():
     #password = input("Enter password: ")
     password = getpass.getpass(prompt = "Enter password: ")
 
+
     save_to_database(site, username, password)
 
 def get_password():
@@ -29,6 +31,8 @@ def get_password():
     username,password = get_from_database(site)
     print("Username: ", username)
     print("Password: ", password)
+    clipboard.copy(password)
+    print("Password copied to clipboard!")
 
 def save_to_database(site, username, password):
     mydb = connect_to_db()
