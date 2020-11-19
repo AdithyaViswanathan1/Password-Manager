@@ -17,4 +17,5 @@ Columns = primary key, site, username, password
 Later features:
 1. Master password
 2. Hashing the password in the database (in case of a database leak/hack)
+3. Copy password to clipboard when getting from database
 3. Option to auto-generate a password when creating passwords
