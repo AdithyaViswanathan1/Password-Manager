@@ -44,10 +44,28 @@ def new_password():
 def get_password():
     site = input("Enter site name: ")
     username,password = get_from_database(site)
-    print("Username: ", username)
-    print("Password: ", password)
-    clipboard.copy(password)
-    print("Password copied to clipboard!")
+    if username == -1:
+        print("Sorry! Site not found in database")
+    else:
+        print("Username: ", username)
+        print("Password: ", password)
+        clipboard.copy(password)
+        print("Password copied to clipboard!")
+
+def edit_password():
+    site = input("Enter site name: ")
+    username, password = get_from_database(site)
+    if username == -1:
+        print("Sorry! Site not found in database")
+    else:
+        print("Here's the information we currently have")
+        print("Username:", username)
+        print("Current Password:", password)
+        new_password = input("New Password: ")
+        updated = update_password_in_database(site, new_password)
+        username, password = get_from_database(site)
+        print("Username:", username)
+        print("Updated Password:", password)
 
 def remove_password():
     site = input("For which site would you like to remove your password for? ")
@@ -85,11 +103,28 @@ def get_from_database(site):
     myresult = mycursor.fetchall()
 
     cipher_suite = Fernet(key)
-    ciphered_text = myresult[0][1]
+    try:
+        ciphered_text = myresult[0][1]
+    except:
+        return -1,-1
     unciphered_text = (cipher_suite.decrypt(bytes(ciphered_text, 'utf-8')))
     #print(unciphered_text)
 
     return myresult[0][0],unciphered_text.decode()
+
+def update_password_in_database(site, password):
+    mydb = connect_to_db()
+
+    mycursor = mydb.cursor()
+
+    cipher_suite = Fernet(key)
+    ciphered_text = cipher_suite.encrypt(str.encode(password))
+
+    sql = "UPDATE passwords SET password = %(password)s WHERE site = %(site)s"
+    mycursor.execute(sql, { 'site': site, 'password': ciphered_text })
+    mydb.commit()
+
+    return mycursor.rowcount
 
 def delete_from_database(site):
     mydb = connect_to_db()
@@ -119,6 +154,7 @@ def main():
     connect_to_db()
     print("Hello, welcome to password manager")
     # enter master password
+
     handle_master_password()
 
     # options
@@ -130,9 +166,10 @@ def main():
         print("Here are your options: ")
         print("1. New password")
         print("2. Get password")
-        print("3. Remove password")
-        print("4. Clear Terminal")
-        print("5. Exit")
+        print("3. Edit password")
+        print("4. Remove password")
+        print("5. Clear Terminal")
+        print("6. Exit")
 
         i = input("What would you like to do? ")
         if i == "1":
@@ -140,10 +177,12 @@ def main():
         elif i == "2":
             get_password()
         elif i == "3":
-            remove_password()
+            edit_password()
         elif i == "4":
-            os.system('clear')
+            remove_password()
         elif i == "5":
+            os.system('clear')
+        elif i == "6":
             done = True
             print("Goodbye")
         else:
