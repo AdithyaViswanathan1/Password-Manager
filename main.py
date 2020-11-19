@@ -1,13 +1,20 @@
 import mysql.connector
 import getpass
+import cryptography
+from cryptography.fernet import Fernet
+import os
 
 def connect_to_db():
+    global key
+    key = b'JPpBRq-SzOEW_qi1dnIrR6NdiT0kuKJRjuRpzpiLkeo='
+    #print(key)
     return mysql.connector.connect(
     host="localhost",
     user="root",
     password="database4thewin",
     database="sys"
     )
+
 
 def new_password():
     site = input("Enter site name: ")
@@ -25,11 +32,14 @@ def get_password():
 
 def save_to_database(site, username, password):
     mydb = connect_to_db()
-    print(site, username, password)
+    cipher_suite = Fernet(key)
+    ciphered_text = cipher_suite.encrypt(str.encode(password))   #required to be bytes
+    #print(ciphered_text)
+    #print(site, username, ciphered_text)
     mycursor = mydb.cursor()
 
     sql = "INSERT INTO passwords (site, username, password) VALUES (%s, %s, %s)"
-    val = (site, username, password)
+    val = (site, username, ciphered_text)
     mycursor.execute(sql, val)
 
     mydb.commit()
@@ -38,7 +48,7 @@ def save_to_database(site, username, password):
 
 def get_from_database(site):
     mydb = connect_to_db()
-    print(site)
+    #print(site)
 
     mycursor = mydb.cursor()
 
@@ -47,7 +57,12 @@ def get_from_database(site):
 
     myresult = mycursor.fetchall()
 
-    return myresult[0][0],myresult[0][1]
+    cipher_suite = Fernet(key)
+    ciphered_text = myresult[0][1]
+    unciphered_text = (cipher_suite.decrypt(bytes(ciphered_text, 'utf-8')))
+    #print(unciphered_text)
+
+    return myresult[0][0],unciphered_text.decode()
 
 
 def handle_master_password():
@@ -78,13 +93,17 @@ def main():
         print("Here are your options: ")
         print("1. Make new password")
         print("2. Get a password")
-        print("3. Exit")
-        i = input("")
+        print("3. Clear Terminal")
+        print("4. Exit")
+
+        i = input("What would you like to do? ")
         if i == "1":
             new_password()
         elif i == "2":
             get_password()
         elif i == "3":
+            os.system('clear')
+        elif i == "4":
             done = True
             print("Goodbye")
         else:
